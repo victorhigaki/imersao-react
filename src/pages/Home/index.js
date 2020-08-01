@@ -1,41 +1,53 @@
-import React from 'react';
-import Menu from '../../components/Menu';
-import dados_iniciais from '../../data/dados_iniciais.json'
+import React, { useEffect, useState } from 'react';
 import BannerMain from '../../components/BannerMain';
-import Footer from '../../components/Footer';
 import Carousel from '../../components/Carousel';
+import categoriasRepository from '../../repositories/categorias';
+import PageDefault from '../../components/PageDefaults';
 
 function Home() {
+  const [dadosIniciais, setDadosIniciais] = useState([]);
+
+  useEffect(() => {
+    categoriasRepository.getAllWithVideos()
+      .then((categoriasComVideos) => {
+        console.log(categoriasComVideos);
+        setDadosIniciais(categoriasComVideos);
+      })
+      .catch((err) => {
+        console.log(err.mensagem);
+      });
+  }, []);
+
   return (
-    <div style={{ background: "#141414" }}>
-      <Menu />
+    <PageDefault paddingAll={0}>
 
-      <BannerMain videoTitle={dados_iniciais.categorias[0].videos[0].titulo}
-        url={dados_iniciais.categorias[0].videos[0].url}
-      />
+      {dadosIniciais.length === 0 && (<div>Loading...</div>)}
 
-      <Carousel
-        ignoreFirstVideo
-        category={dados_iniciais.categorias[0]}
-      />
+      {dadosIniciais.map((categoria, indice) => {
+        if (indice === 0) {
+          return (
+            <div key={categoria.id}>
+              <BannerMain
+                videoTitle={dadosIniciais[0].videos[0].titulo}
+                url={dadosIniciais[0].videos[0].url}
+                videoDescription={dadosIniciais[0].videos[0].description}
+              />
+              <Carousel
+                ignoreFirstVideo
+                category={dadosIniciais[0]}
+              />
+            </div>
+          );
+        }
+        return (
+          <Carousel
+            key={categoria.id}
+            category={categoria}
+          />
+        );
+      })}
 
-      <Carousel category={dados_iniciais.categorias[1]}
-      />
-
-      <Carousel category={dados_iniciais.categorias[2]}
-      />
-
-      <Carousel category={dados_iniciais.categorias[3]}
-      />
-
-      <Carousel category={dados_iniciais.categorias[4]}
-      />
-
-      <Carousel category={dados_iniciais.categorias[5]}
-      />
-
-      <Footer />
-    </div>
+    </PageDefault>
   );
 }
 
